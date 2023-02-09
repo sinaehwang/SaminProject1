@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.example.service.TestMapper">
+
+<!-- 
+	<select id = "selectTest" resultType="egovframework.example.vo.EgoVo">
+		SELECT *
+		FROM `worker`
+	</select>
+	
+	<select id = "selectDetail" parameterType="String" resultType="egovframework.example.vo.EgoVo">
+		SELECT *
+		FROM `worker`
+		WHERE `NAME`=#{name}
+	</select>
+ -->	
+ 
+ 	<insert id="doAdd" parameterType = "egovframework.example.vo.EgoVo" >
+ 	INSERT INTO board SET
+	title=#{title},
+	content=#{content},
+	writer=(select concat('익명', (select ifnull(max(board_id), 0)+1 from board ALIAS_FOR_SUBQUERY))),
+	`password` =#{password},
+	views = -1,
+	regdate=NOW(),
+	updatedate=NOW(),
+	deletedate=NOW()
+	</insert>
+	 
+	 <select id="getArticle" parameterType ="Integer" resultType="egovframework.example.vo.EgoVo" >
+	 
+	 SELECT * FROM board
+	 WHERE board_id = #{id}
+	 
+	 </select>
+	 
+	 <select id="list" resultType="egovframework.example.vo.EgoVo">
+	 
+	 SELECT *FROM board
+	 ORDER BY board_id DESC
+	 </select>
+	 
+	 <delete id="delete" parameterType="Integer">
+	 
+	 DELETE FROM board
+	 WHERE board_id=#{id}
+	 
+	 </delete>
+	 
+	 <update id="doModify">
+	 UPDATE board
+	 <set>
+	 	<if test="title != null and title !='' ">title = #{title},</if>
+	 	<if test="content != null and content !='' ">content = #{content},</if>
+	 	updatedate=NOW()
+	 </set>
+	 WHERE board_id=#{board_id}
+	 
+	 </update>
+	 	
+	 <select id="getLastId" resultType="Integer">
+	 SELECT board_id FROM board ORDER BY board_id DESC LIMIT 0,1;
+	 </select>
+	 
+	<!-- 게시판 전체 조회 -->
+	 <select id="selectBoard" parameterType="egovframework.example.vo.MainVO" resultType="egovframework.example.vo.MainVO">
+		SELECT board_id, title, DATE_FORMAT(regdate, '%Y-%m-%d') AS regdate, views FROM board
+		<where>
+			
+			<if test="searchType=='title' and keyword != null and keyword !=''">
+				AND title like CONCAT('%',#{keyword},'%')
+			</if>
+			
+			<if test="searchType=='content' and keyword != null and keyword !=''">
+				AND content like CONCAT('%',#{keyword},'%')
+			</if>
+			
+		</where>
+		
+		ORDER BY board_id DESC
+		LIMIT #{startList}, #{listSize}
+	</select> 
+	
+	<!-- 게시글 갯수 -->
+    <select id="getBoardListCnt" resultType="Integer">
+        SELECT count(*) as listCnt
+        FROM board
+        <where>
+            <if test="keyword != null and keyword != ''">
+                <if test="searchType=='title'">
+                    AND title like CONCAT('%',#{keyword},'%')
+                </if>
+                <if test="searchType=='content'">
+                    AND content like CONCAT('%',#{keyword},'%')
+                </if>
+            </if>
+        </where>
+    </select>
+    
+    <select id="selectDetail" parameterType="Integer" resultType="egovframework.example.vo.MainVO">
+    	SELECT * FROM board
+    	WHERE board_id = #{board_id}
+    </select>
+   
+    
+    <!-- 조회수 증가 -->
+    <update id="boardHitUpdate" parameterType="int">
+    	UPDATE board SET views=views+1 
+    	WHERE board_id=${num}
+    </update>	 
+	 
+	 
+</mapper>

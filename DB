@@ -1,0 +1,54 @@
+
+CREATE TABLE board (
+	board_id INT auto_increment NOT NULL COMMENT '번호',
+	title varchar(50) NOT NULL COMMENT '제목',
+	content varchar(1000) NOT NULL COMMENT '내용',
+	writer varchar(50) NOT NULL COMMENT '등록자',
+	password varchar(200) NULL COMMENT '비밀번호',
+	views INT NOT NULL COMMENT '조회수',
+	regdate DATETIME NOT NULL COMMENT '등록일',
+	updatedate DATETIME NULL COMMENT '수정일',
+	deletedate DATETIME NULL COMMENT '삭제일',
+	CONSTRAINT board_pk PRIMARY KEY (board_id)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8
+COLLATE=utf8_general_ci
+COMMENT='삼인의 숲 게시판 테이블';
+
+INSERT INTO board SET
+title='제목',
+content='내용',
+writer= (select concat('익명', (select ifnull(max(board_id), 0)+1 from board ALIAS_FOR_SUBQUERY))),
+`password` ='1234',
+views = 0,
+regdate=NOW(),
+updatedate=NOW(),
+deletedate=NOW()
+
+
+INSERT INTO board
+(
+   title,
+   content,
+   writer,
+   password,
+   views,
+   regdate,
+   updatedate,
+   deletedate
+)VALUES (
+   '제목',
+   '내용',
+   (select concat('익명', (select ifnull(max(board_id), 0)+1 from board ALIAS_FOR_SUBQUERY))),
+   '1234',
+   '10',
+   NOW(),
+   NOW(),
+   NOW()
+)
+	
+DROP TABLE board
+SELECT*FROM board
+
+
